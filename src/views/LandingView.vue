@@ -29,23 +29,6 @@
             </a>
           </div>
 
-          <!-- Statistiche -->
-          <div class="hero-stats mt-5">
-            <div class="stat-item">
-              <div class="stat-num display-font">12K+</div>
-              <div class="stat-label">Corridori Attivi</div>
-            </div>
-            <div class="stat-divider" aria-hidden="true"></div>
-            <div class="stat-item">
-              <div class="stat-num display-font">4.8K</div>
-              <div class="stat-label">Match Creati</div>
-            </div>
-            <div class="stat-divider" aria-hidden="true"></div>
-            <div class="stat-item">
-              <div class="stat-num display-font">98%</div>
-              <div class="stat-label">Soddisfazione</div>
-            </div>
-          </div>
         </div>
 
         <!-- Card mockup Sarah K -->
@@ -192,21 +175,6 @@ const passi = [
   margin-top: 1.25rem;
 }
 
-/* Statistiche */
-.hero-stats { display: flex; align-items: center; gap: 2rem; }
-
-.stat-num { font-size: 2rem; color: var(--orange); line-height: 1; }
-
-.stat-label {
-  color: rgba(255,255,255,0.4);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-top: 0.2rem;
-}
-
-.stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.1); }
-
 /* Mockup card */
 .hero-mockup {
   position: absolute;
@@ -271,6 +239,19 @@ const passi = [
 .mock-actions {
   display: flex; justify-content: center; gap: 1.25rem;
   padding: 0.75rem 1rem; background: #1a1a1a;
+}
+
+/* Fix visibilità pulsante "Come Funziona" su hero scuro (Brave, Safari, Firefox) */
+/* Il --text-primary su sfondo nero è quasi invisibile: forziamo bianco nell'hero */
+.landing-hero .btn-stranet-outline {
+  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.landing-hero .btn-stranet-outline:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: #ffffff;
 }
 
 /* Come funziona */

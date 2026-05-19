@@ -64,9 +64,8 @@
             class="match-item"
             :aria-label="`${match.displayName}, ${match.age} anni. ${match.stravaUrl ? 'Apri profilo Strava' : 'Nessun link Strava disponibile'}`"
           >
-            <!-- Avatar con fallback via onError -->
             <img
-              :src="urlFotoUtente(match)"
+              :src="urlFoto(match)"
               :alt="`Foto profilo di ${match.displayName}`"
               class="match-avatar"
               @error="gestisciErroreFoto($event, match)"
@@ -106,28 +105,21 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { collection, query, where, onSnapshot, getDoc, doc } from 'firebase/firestore'
 import { db } from '../services/firebase'
+import { urlFoto, urlFallbackAvatar } from '../services/media'
 import { useUserStore } from '../store/user'
 import TopNav from '../components/TopNav.vue'
 
 const storeUtente = useUserStore()
-const avatarFallback = 'https://ui-avatars.com/api/?background=E8520A&color=fff&size=128&name='
 
 const listaMatch = ref([])
 const caricamento = ref(true)
 const queryRicerca = ref('')
 let annullaAscolto = null
 
-// Genera URL foto con fallback robusto
-function urlFotoUtente(utente) {
-  if (utente._fotoRotta) {
-    return `${avatarFallback}${encodeURIComponent(utente.displayName || '?')}`
-  }
-  return utente.photo || `${avatarFallback}${encodeURIComponent(utente.displayName || '?')}`
-}
-
+// Gestisce errore foto: segna l'utente e usa fallback
 function gestisciErroreFoto(evento, utente) {
   utente._fotoRotta = true
-  evento.target.src = `${avatarFallback}${encodeURIComponent(utente.displayName || '?')}`
+  evento.target.src = urlFallbackAvatar(utente.displayName)
 }
 
 const matchFiltrati = computed(() => {

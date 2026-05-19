@@ -42,23 +42,14 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { useUserStore } from '../store/user'
+import { urlFoto, urlFallbackAvatar } from '../services/media'
 
 const route = useRoute()
 const storeUtente = useUserStore()
 
-function urlFoto(utente) {
-  if (!utente) return urlFallback('?')
-  if (utente._avatarRotto) return urlFallback(utente.displayName)
-  return utente.photo || urlFallback(utente.displayName)
-}
-
-function urlFallback(nome) {
-  return `https://ui-avatars.com/api/?background=E8520A&color=fff&size=80&bold=true&name=${encodeURIComponent(nome || '?')}`
-}
-
 function gestisciErroreAvatar(evento) {
   if (storeUtente.userProfile) storeUtente.userProfile._avatarRotto = true
-  evento.target.src = urlFallback(storeUtente.userProfile?.displayName)
+  evento.target.src = urlFallbackAvatar(storeUtente.userProfile?.displayName)
 }
 </script>
 

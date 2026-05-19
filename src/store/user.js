@@ -1,4 +1,4 @@
-// src/store/user.js
+// src/store/user.js — Store Pinia per autenticazione e profilo utente
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import {
@@ -7,46 +7,42 @@ import {
   signOut,
   onAuthStateChanged
 } from 'firebase/auth'
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  serverTimestamp
-} from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../services/firebase'
 
 export const useUserStore = defineStore('user', () => {
+
+  // ── Stato reattivo ──────────────────────────────────────────────────────
   const currentUser = ref(null)
   const userProfile = ref(null)
   const loading = ref(true)
   const darkMode = ref(false)
 
+  // ── Proprietà calcolate ─────────────────────────────────────────────────
   const isAuthenticated = computed(() => !!currentUser.value)
-  const needsOnboarding = computed(() => {
-    if (!userProfile.value) return false
-    return !userProfile.value.displayName || !userProfile.value.age
-  })
+  const needsOnboarding = computed(() =>
+    !!userProfile.value && (!userProfile.value.displayName || !userProfile.value.age)
+  )
 
+  // ── Inizializzazione listener Firebase Auth ─────────────────────────────
   function initAuth() {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       onAuthStateChanged(auth, async (user) => {
         currentUser.value = user
-        if (user) {
-          await fetchProfile(user.uid)
-        } else {
-          userProfile.value = null
-        }
+        if (user) await fetchProfile(user.uid)
+        else userProfile.value = null
         loading.value = false
         resolve(user)
       })
     })
   }
 
+  // ── Caricamento profilo da Firestore ────────────────────────────────────
   async function fetchProfile(uid) {
     const snap = await getDoc(doc(db, 'users', uid))
     if (snap.exists()) {
       userProfile.value = { id: snap.id, ...snap.data() }
+      // Ripristina dark mode dalla preferenza salvata
       if (userProfile.value.darkMode) {
         darkMode.value = true
         document.body.classList.add('dark-theme')
@@ -56,12 +52,12 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  // ── Registrazione nuovo utente ──────────────────────────────────────────
   async function register(email, password) {
-    const cred = await createUserWithEmailAndPassword(auth, email, password)
-    const uid = cred.user.uid
-    const photo = `https://i.pravatar.cc/150?u=${uid}`
-    await setDoc(doc(db, 'users', uid), {
-      photo,
+    const { user } = await createUserWithEmailAndPassword(auth, email, password)
+    // Crea documento utente su Firestore (foto placeholder via ui-avatars)
+    await setDoc(doc(db, 'users', user.uid), {
+      photo: `https://ui-avatars.com/api/?background=E8520A&color=fff&size=150&bold=true&name=?`,
       bio: '',
       displayName: '',
       age: null,
@@ -69,16 +65,18 @@ export const useUserStore = defineStore('user', () => {
       lastActivity: '',
       updatedAt: serverTimestamp()
     })
-    await fetchProfile(uid)
-    return cred.user
+    await fetchProfile(user.uid)
+    return user
   }
 
+  // ── Login ───────────────────────────────────────────────────────────────
   async function login(email, password) {
-    const cred = await signInWithEmailAndPassword(auth, email, password)
-    await fetchProfile(cred.user.uid)
-    return cred.user
+    const { user } = await signInWithEmailAndPassword(auth, email, password)
+    await fetchProfile(user.uid)
+    return user
   }
 
+  // ── Logout ──────────────────────────────────────────────────────────────
   async function logout() {
     await signOut(auth)
     currentUser.value = null
@@ -87,22 +85,19 @@ export const useUserStore = defineStore('user', () => {
     document.body.classList.remove('dark-theme')
   }
 
+  // ── Aggiornamento profilo ───────────────────────────────────────────────
   async function updateProfile(data) {
-    const uid = currentUser.value.uid
-    await updateDoc(doc(db, 'users', uid), {
+    await updateDoc(doc(db, 'users', currentUser.value.uid), {
       ...data,
       updatedAt: serverTimestamp()
     })
-    await fetchProfile(uid)
+    await fetchProfile(currentUser.value.uid)
   }
 
+  // ── Toggle dark mode (persiste su Firestore) ────────────────────────────
   function toggleDarkMode() {
     darkMode.value = !darkMode.value
-    if (darkMode.value) {
-      document.body.classList.add('dark-theme')
-    } else {
-      document.body.classList.remove('dark-theme')
-    }
+    document.body.classList.toggle('dark-theme', darkMode.value)
     if (currentUser.value) {
       updateDoc(doc(db, 'users', currentUser.value.uid), { darkMode: darkMode.value })
     }
