@@ -69,20 +69,21 @@
                 style="font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 48;">close</span>
             </div>
 
-            <!-- Immagine grande dell'ultima attività -->
+            <!-- Immagine grande dell'ultima attività — chiave reattiva per forzare reload -->
             <div class="card-activity-wrap">
               <img
-                :key="corrente?.id"
+                :key="corrente?.id + '_' + corrente?.lastActivity"
                 :src="urlAttivita(corrente)"
                 :alt="`Ultima corsa di ${corrente?.displayName}`"
                 class="card-activity-img"
                 draggable="false"
+                loading="eager"
                 @error="e => e.target.src = fallbackAttivita"
               />
             </div>
 
-            <!-- Overlay info in basso: avatar piccolo tondo + nome/bio -->
-            <div class="card-info-overlay">
+            <!-- Pannello info solido sotto l'immagine: avatar + nome + bio leggibile -->
+            <div class="card-info-panel">
               <img
                 :src="urlFoto(corrente)"
                 :alt="`Foto di ${corrente?.displayName}`"
@@ -92,7 +93,7 @@
               />
               <div class="card-info-testo">
                 <div class="card-nome">{{ corrente?.displayName }}<span class="card-eta">, {{ corrente?.age }}</span></div>
-                <div class="card-bio">{{ corrente?.bio || 'Nessuna bio' }}</div>
+                <div class="card-bio" v-if="corrente?.bio">{{ corrente.bio }}</div>
               </div>
             </div>
           </div>
@@ -316,14 +317,14 @@ onUnmounted(() => document.removeEventListener('selectstart', bloccaSelezione))
 /* ── Area swipe con stack di card ── */
 .swipe-area { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
 
-.swipe-stack-wrap { position: relative; width: 100%; max-width: 360px; height: 460px; }
+.swipe-stack-wrap { position: relative; width: 100%; max-width: 360px; height: 500px; }
 
 /* ── Stile base card ── */
 .runner-card {
   border-radius: 16px; overflow: hidden;
   background: var(--card-bg);
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  position: absolute; top: 0; left: 0; right: 0; height: 460px;
+  position: absolute; top: 0; left: 0; right: 0; height: 480px;
   display: flex; flex-direction: column;
   user-select: none; -webkit-user-select: none;
 }
@@ -341,7 +342,7 @@ onUnmounted(() => document.removeEventListener('selectstart', bloccaSelezione))
 }
 .card-principale:active { cursor: grabbing; }
 
-/* ── Immagine attività (occupa tutto lo spazio della card) ── */
+/* ── Immagine attività (parte superiore della card) ── */
 .card-activity-wrap { flex: 1; position: relative; overflow: hidden; background: var(--gray-200); min-height: 0; }
 
 .card-activity-img {
@@ -349,34 +350,43 @@ onUnmounted(() => document.removeEventListener('selectstart', bloccaSelezione))
   pointer-events: none; -webkit-user-drag: none;
 }
 
-/* ── Overlay in basso: gradiente + avatar tondo + info testo ── */
-.card-info-overlay {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 4rem 1.25rem 1.1rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 65%, transparent 100%);
-  display: flex; align-items: flex-end; gap: 0.75rem;
-  pointer-events: none;
+/* ── Pannello info solido sotto l'immagine ── */
+/* Sfondo pieno del tema: bio sempre leggibile, niente confusione con l'immagine */
+.card-info-panel {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1.125rem;
+  background: var(--card-bg);
+  border-top: 1px solid var(--border-color);
 }
 
 .card-avatar {
-  width: 50px; height: 50px; border-radius: 50%; object-fit: cover;
+  width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
   border: 2.5px solid var(--orange); flex-shrink: 0;
-  display: block; background: #333;
+  display: block; background: #ccc;
   pointer-events: none; -webkit-user-drag: none;
 }
 
 .card-info-testo { flex: 1; min-width: 0; }
 
 .card-nome {
-  font-family: var(--font-display); font-weight: 400; font-size: 1.4rem;
-  text-transform: uppercase; color: #fff; line-height: 1.1;
+  font-family: var(--font-display); font-weight: 400; font-size: 1.05rem;
+  text-transform: uppercase; color: var(--text-primary); line-height: 1.1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.card-eta { font-size: 1rem; color: rgba(255,255,255,0.7); }
+.card-eta { font-size: 0.88rem; color: var(--orange); margin-left: 0.1rem; }
 
+/* Bio su 2 righe, sfondo solido = leggibile senza sforzo */
 .card-bio {
-  font-size: 0.8rem; color: rgba(255,255,255,0.65);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.2rem;
+  font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;
+  margin-top: 0.2rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ── Overlay LIKE / PASS (solo icona) ── */

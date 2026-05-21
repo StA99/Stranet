@@ -6,7 +6,11 @@
       <div class="container position-relative">
         <nav class="d-flex align-items-center justify-content-between py-4" role="navigation" aria-label="Navigazione sito">
           <span class="stranet-logo" aria-label="STRANET">STRA<span>NET</span></span>
-          <router-link to="/auth" class="btn-stranet btn-stranet-primary" aria-label="Accedi a STRANET">Accedi</router-link>
+          <router-link to="/auth" class="btn-accedi-landing" aria-label="Accedi a STRANET">
+            Accedi
+            <span class="material-symbols-rounded" aria-hidden="true" translate="no"
+              style="font-size:0.9rem;vertical-align:middle;margin-left:4px;">arrow_forward</span>
+          </router-link>
         </nav>
 
         <div class="hero-content fade-in">
@@ -239,6 +243,35 @@ const passi = [
 .mock-actions {
   display: flex; justify-content: center; gap: 1.25rem;
   padding: 0.75rem 1rem; background: #1a1a1a;
+}
+
+/* Pulsante Accedi nella navbar della landing — sempre visibile su sfondo nero */
+.btn-accedi-landing {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--orange);
+  color: #ffffff;
+  border: none;
+  border-radius: 2px;
+  padding: 0.6rem 1.25rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  /* Garantisce visibilità e cliccabilità */
+  position: relative;
+  z-index: 10;
+  pointer-events: all;
+}
+
+.btn-accedi-landing:hover {
+  background: var(--orange-dark);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 /* Fix visibilità pulsante "Come Funziona" su hero scuro (Brave, Safari, Firefox) */
